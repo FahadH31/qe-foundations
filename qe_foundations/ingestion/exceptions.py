@@ -47,40 +47,30 @@ class SourceNotFoundError(SourceError):
 
 
 class SourceUnreadableError(SourceError):
-    """TODO: the path exists but cannot be read (permissions, it is a folder, ...).
-
-    __init__(self, path, os_error); the detail should mention the NAME of the
-    OS error's class, e.g. "cannot be read (PermissionError)".
-    """
-
-    pass  # TODO
+    def __init__(self, path, os_error):
+        super().__init__(path, f"Path exists but cannot be read: {type(os_error).__name__}")
 
 
 class UnsupportedFormatError(SourceError):
-    """TODO: the file extension is not .csv/.json/.xml.
+    def __init__(self, path, suffix):
+        self.suffix = suffix
+        super().__init__(path, f"File extension is not .csv/.json/.xml")
 
-    __init__(self, path, suffix); must store `self.suffix`.
-    """
-
-    pass  # TODO
 
 
 class MalformedSourceError(SourceError):
-    """TODO: content is invalid for its format (bad JSON, unclosed XML, bad encoding).
+    def __init__(self, path, detail):
+        super().__init__(path, detail)
 
-    Hint: it can simply reuse SourceError's __init__(path, detail).
-    """
-
-    pass  # TODO
 
 
 class MissingColumnsError(SourceError):
-    """TODO: a CSV file lacks required columns.
-
-    __init__(self, path, missing); must store `self.missing` as a list.
-    """
-
-    pass  # TODO
+    def __init__(self,path,missing):
+        super().__init__(path, f"File is lacking columns: {missing}")
+        if missing is None:
+            self.missing = []
+        else:
+            self.missing = list(missing)
 
 
 # ---- One record is invalid -------------------------------------------------
@@ -94,28 +84,19 @@ class RecordValidationError(IngestionError):
 
 
 class MissingFieldError(RecordValidationError):
-    """TODO: a required field is absent, None, or blank.
-
-    __init__(self, row, field_name)
-    """
-
-    pass  # TODO
+    def __init__(self, row, field_name):
+        super().__init__(row=row, field_name = field_name, message = f"Required field: {field_name} is absent, None, or blank.")
 
 
 class InvalidValueError(RecordValidationError):
-    """TODO: a field is present but its value is not acceptable.
-
-    __init__(self, row, field_name, value, expected); store `self.value` and
-    `self.expected`.
-    """
-
-    pass  # TODO
+    def __init__(self, row , field_name, value, expected):
+        self.value = value
+        self.expected = expected
+        super().__init__(row = row, field_name = field_name, message = f"Field: {field_name} is present but value: {value} is not accepted.")
 
 
 class DuplicateIdError(RecordValidationError):
-    """TODO: the same test id appeared earlier in the file.
+    def __init__(self, row, test_id):
+        self.test_id = test_id
+        super().__init__(row = row, field_name = "id", message = f"The id: '{test_id}' already appeared earlier in the file.")
 
-    __init__(self, row, test_id); store `self.test_id`; the field is "id".
-    """
-
-    pass  # TODO
