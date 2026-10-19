@@ -1,11 +1,11 @@
-<h2>Week 2 Project</h2>
+<h2>Week 2 Project - QE Foundations</h2>
 Legacy Code Migration
 
 <h2>Setup</h2>
 <ol>
     <li>Clone this repository.</li>
     <li>Create virtual environment with `python -m venv .venv`</li>
-    <li>Activate it with `.venv/Scripts/Activate.ps1`</li>
+    <li>Activate it with `.venv/Scripts/Activate.ps1` for Powershell, `source .venv/bin/activate` for bash.</li>
     <li>Install dependencies with `python -m pip install -r requirements.txt</li>
     <li>Verify success by running `python smoke_utils.py`</li>
 </ol>
