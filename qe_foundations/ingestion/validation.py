@@ -7,6 +7,7 @@ Do NOT use `assert` in this file (assertions can be switched off with `python -O
 See README Task 5 for the exact rules.
 """
 
+import math
 from .exceptions import InvalidValueError, MissingFieldError
 
 REQUIRED_FIELDS = ("id", "title", "status", "duration")
@@ -21,4 +22,37 @@ def validate_record(row, raw):
 
     Returns {"id": str, "title": str, "status": str, "duration": float}.
     """
-    raise NotImplementedError("Task 5: write validate_record")
+    # Check 1
+    if not isinstance(raw, dict):
+        raise InvalidValueError(row, "record", raw, "an object with the test fields")
+    
+    # Check 2
+    for name in REQUIRED_FIELDS:
+        value = raw.get(name)
+        if value is None or str(value).strip() == "":
+            raise MissingFieldError(row, name)
+
+    # Check 3
+    status = str(raw["status"]).strip().lower()
+    if status not in VALID_STATUSES:
+        raise InvalidValueError(row, "status", raw["status"], "A valid status (pass/fail/blocked)")
+    
+    # Check 4
+    raw_duration = raw["duration"]
+    # check for boolean
+    if str(raw_duration).strip().upper() == "TRUE" or str(raw_duration).strip().upper() == "FALSE":
+        raise InvalidValueError(row, "duration", raw["duration"], "Duration value cannot be boolean.")
+    # try convert to float
+    try:
+        duration = float(raw_duration)
+    except (ValueError, TypeError) as error:
+        raise InvalidValueError(row, "duration", raw["duration"], error) from error
+    if duration < 0 or not math.isfinite(duration):     # check all of negative, infinite, nan
+        raise InvalidValueError(row, "duration", raw["duration"], "Duration value cannot be negative, infinite, or NaN.")
+
+    return {                                                                                                                                                                 
+        "id": str(raw["id"]).strip(),                                                                                                                                        
+        "title": str(raw["title"]).strip(),                                                                                                                                  
+        "status": status,                                                                                                                                                    
+        "duration": duration,                                                                                                                                                
+    }   
