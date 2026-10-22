@@ -15,10 +15,10 @@ check_exercise.py compares this table with what your queries return.
 | R-02 | 5011, 5022 | 2 rows | Catches missing '@' (5011) and missing domain dot (5022); ignores blanks caught by R-01 |
 | R-03 | 5008, 5014, 5027, 5029 | 4 rows | Catches title case 'Passed' (5008), trailing space 'FAILED ' (5014), NULL (5027), and 'PASS' (5029) |
 | R-04 | 5009, 5016 | 2 rows | Catches negative duration (5009) and NULL (5016); 0 ms is legal for SKIPPED runs |
-| R-05 | | | |
-| R-06 | | | |
-| R-07 | | | |
-| R-08 | | | |
+| R-05 | 5030, 5023 | 2 |  |
+| R-06 | 5013, 5020 | 2 | |
+| R-07 | 5017, 5024, 5026 | | |
+| R-08 | 5014, 5018, 5028| | |
 | R-09 | | | |
 | R-10 | | | |
 | R-11 | | | |
