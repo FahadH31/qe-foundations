@@ -11,10 +11,10 @@ check_exercise.py compares this table with what your queries return.
 
 | Rule | Defects found (run_ids) | Predicted (before running) | Notes / surprises |
 |---|---|---|---|
-| R-01 | | | |
-| R-02 | | | |
-| R-03 | | | |
-| R-04 | | | |
+| R-01 | 5006, 5019, 5025 | 3 rows | Catches NULL (5006), empty string '' (5019), and spaces-only '   ' (5025) |
+| R-02 | 5011, 5022 | 2 rows | Catches missing '@' (5011) and missing domain dot (5022); ignores blanks caught by R-01 |
+| R-03 | 5008, 5014, 5027, 5029 | 4 rows | Catches title case 'Passed' (5008), trailing space 'FAILED ' (5014), NULL (5027), and 'PASS' (5029) |
+| R-04 | 5009, 5016 | 2 rows | Catches negative duration (5009) and NULL (5016); 0 ms is legal for SKIPPED runs |
 | R-05 | | | |
 | R-06 | | | |
 | R-07 | | | |
