@@ -19,4 +19,10 @@ Requirements (check_exercise.py tests them):
 class ValidationFailedError(Exception):
     """TODO: carry rule_id, description and rows; write a helpful message."""
     # TODO: def __init__(self, rule, rows): ...
-    pass
+    def __init__(self, rule, rows):
+        self.rule = rule                                                                                                   
+        self.rule_id = getattr(rule, "rule_id", "")                                                                        
+        self.description = getattr(rule, "description", "")                                                                
+        self.rows = rows                                                                                                   
+        self.expect = getattr(rule, "expect", 0)
+        print(f"Rule ID: {rule.rule_id}, Row Count: {len(rows)}, Description: {rule.description}")

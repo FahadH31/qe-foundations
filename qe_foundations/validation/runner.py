@@ -130,7 +130,30 @@ def setup_logging(log_file: Path = DEFAULT_LOG_FILE) -> logging.Logger:
         "duplicate log lines" pitfall)
     Hint: Wednesday demo file demos/3-wednesday/code/qa_logging.py.
     """
-    raise NotImplementedError("TODO: implement setup_logging")
+    logger = logging.getLogger(LOGGER_NAME)                                                                                
+    logger.setLevel(logging.DEBUG)                                                                                         
+                                                                                                                            
+    if logger.handlers:                                                                                                    
+        for handler in list(logger.handlers):                                                                              
+            handler.close()                                                                                                
+            logger.removeHandler(handler)                                                                                  
+                                                                                                                            
+    log_path = Path(log_file)                                                                                              
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")                                               
+                                                                                                                               
+    fh = logging.FileHandler(str(log_path), encoding="utf-8")                                                              
+    fh.setLevel(logging.DEBUG)                                                                                             
+    fh.setFormatter(formatter)                                                                                             
+    logger.addHandler(fh)                                                                                                  
+                                                                                                                            
+    ch = logging.StreamHandler(sys.stdout)                                                                                 
+    ch.setLevel(logging.INFO)                                                                                              
+    ch.setFormatter(formatter)                                                                                             
+    logger.addHandler(ch)                                                                                                  
+                                                                                                                            
+    return logger   
 
 
 # ---------------------------------------------------------------- TODO 2: run one rule
@@ -142,7 +165,15 @@ def run_rule(conn: sqlite3.Connection, rule: Rule) -> list:
       * if len(rows) == rule.expect -> the rule holds: return the rows
       * otherwise -> raise ValidationFailedError(rule, rows)   (see exceptions.py)
     """
-    raise NotImplementedError("TODO: implement run_rule")
+    _, rows = fetch_rows(conn, rule.sql)                                                                                   
+                                                                                                                            
+    if rule.expect is None:                                                                                                
+        return rows                                                                                                        
+                                                                                                                            
+    if len(rows) == rule.expect:                                                                                           
+        return rows                                                                                                        
+                                                                                                                            
+    raise ValidationFailedError(rule, rows)
 
 
 # ---------------------------------------------------------------- TODO 3: run the whole suite
@@ -167,7 +198,43 @@ def run_all(conn: sqlite3.Connection, rules: List[Rule], logger: logging.Logger)
       * finish with a one-line summary: how many PASS / FAIL / INFO
     Return a list with one RuleResult per rule, in file order.
     """
-    raise NotImplementedError("TODO: implement run_all")
+    results: List[RuleResult] = []                                                                                         
+    pass_count = 0                                                                                                         
+    fail_count = 0                                                                                                         
+    info_count = 0                                                                                                         
+                                                                                                                            
+    for rule in rules:                                                                                                     
+        # File handler records DEBUG detail of the SQL query being run                                                     
+        logger.debug("Running query for %s: %s", rule.rule_id, rule.sql)                                                   
+        try:                                                                                                               
+            rows = run_rule(conn, rule)                                                                                    
+            if rule.expect is None:                                                                                        
+                status = "INFO"                                                                                            
+                info_count += 1                                                                                            
+                logger.info("%s INFO: %s (%d row(s))", rule.rule_id, rule.description, len(rows))                          
+                print(f"INFO  {rule.rule_id:<5} {rule.dimension:<14} {rule.description}  ({len(rows)} row(s))")            
+            else:                                                                                                          
+                status = "PASS"                                                                                            
+                pass_count += 1                                                                                            
+                logger.info("%s PASS: %s", rule.rule_id, rule.description)                                                 
+                print(f"PASS  {rule.rule_id:<5} {rule.dimension:<14} {rule.description}")                                  
+            results.append(RuleResult(rule=rule, status=status, rows=rows))                                                
+        except ValidationFailedError as exc:                                                                               
+            status = "FAIL"                                                                                                
+            fail_count += 1                                                                                                
+            rows = exc.rows                                                                                                
+            logger.warning("%s FAIL: %s (%d row(s))", rule.rule_id, rule.description, len(rows))                           
+            print(f"FAIL  {rule.rule_id:<5} {rule.dimension:<14} {rule.description}  ({len(rows)} violating row(s))")      
+            for r in rows:                                                                                                 
+                print(f"      {r}")                                                                                        
+            results.append(RuleResult(rule=rule, status=status, rows=rows))                                                
+        except Exception as exc:                                                                                           
+            # Broken SQL or query error: log and re-raise so it's not swallowed                                            
+            logger.exception("Unexpected error running %s: %s", rule.rule_id, exc)                                         
+            raise                                                                                                          
+                                                                                                                            
+    print(f"\nSummary: PASS {pass_count}   FAIL {fail_count}   INFO {info_count}")                                         
+    return results
 
 
 # ---------------------------------------------------------------- command line (PROVIDED + 1 TODO)
@@ -216,7 +283,13 @@ def main(argv=None) -> int:
     #   2. results = run_all(conn, rules, logger)
     #   3. return 0 if no result has status "FAIL" or args.allow_failures is set,
     #      otherwise return 1   (a non-zero exit code is how CI notices a failure)
-    raise NotImplementedError("TODO: wire up setup_logging, run_all and the exit code")
+    logger = setup_logging(Path(args.log_file))                                                                            
+    results = run_all(conn, rules, logger)                                                                                 
+                                                                                                                            
+    has_failures = any(r.status == "FAIL" for r in results)                                                                
+    if has_failures and not args.allow_failures:                                                                           
+        return 1                                                                                                           
+    return 0
 
 
 if __name__ == "__main__":
