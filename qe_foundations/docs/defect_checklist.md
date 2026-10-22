@@ -17,12 +17,12 @@ check_exercise.py compares this table with what your queries return.
 | R-04 | 5009, 5016 | 2 rows | Catches negative duration (5009) and NULL (5016); 0 ms is legal for SKIPPED runs |
 | R-05 | 5030, 5023 | 2 |  |
 | R-06 | 5013, 5020 | 2 | |
-| R-07 | 5017, 5024, 5026 | | |
-| R-08 | 5014, 5018, 5028| | |
-| R-09 | | | |
-| R-10 | | | |
-| R-11 | | | |
-| R-12 | | | |
+| R-07 | 5017, 5024, 5026 | 3 | |
+| R-08 | 5014, 5018, 5028| 3 | |
+| R-09 | 5010, 5015, 5035 | 3 | |
+| R-10 | 5005, 5032 | 2 | |
+| R-11 | 5003, 5012, 5033 | 3 | |
+| R-12 | 5031, 5034, 5036, 5037 | 4 | |
 
 ## Decoys: rows that look odd but are LEGAL (we must not flag them)
 
