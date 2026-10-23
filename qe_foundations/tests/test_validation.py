@@ -34,28 +34,65 @@ class ValidationRunnerTests(unittest.TestCase):
         self.assertTrue(required <= ids, f"missing rules: {sorted(required - ids)}")
 
     # ---- TODO: replace each self.fail with a real test ----------------------
-    def test_run_rule_returns_rows_when_rule_holds(self):
-        # Arrange: a Rule whose SQL returns no rows (e.g. WHERE run_id = -1) and expect=0
-        # Act:     runner.run_rule(self.conn, rule)
-        # Assert:  the result is an empty list and no exception was raised
-        self.fail("TODO: write this test")
-
-    def test_run_rule_raises_validation_failed_error_with_the_evidence(self):
-        # Arrange: a Rule whose SQL returns run 5003 (WHERE run_id = 5003), expect=0
-        # Act/Assert: with self.assertRaises(ValidationFailedError) as ctx: ...
-        #             then assert ctx.exception.rule_id and ctx.exception.rows
-        self.fail("TODO: write this test")
-
-    def test_duration_rule_catches_the_known_bad_runs(self):
-        # Arrange: find rule R-04 in runner.parse_rules()
-        # Act:     rows = runner.fetch_rows(self.conn, rule.sql)[1]
-        # Assert:  the run_ids you PREDICTED (from your own defect checklist) are returned
-        self.fail("TODO: write this test")
-
-    def test_expectation_rule_fails_when_the_expected_row_is_missing(self):
-        # Arrange: a Rule with expect=1 whose SQL matches NOTHING (WHERE run_id = -1)
-        # Assert:  run_rule raises ValidationFailedError
-        self.fail("TODO: write this test")
+    def test_run_rule_returns_rows_when_rule_holds(self):                                                                  
+        rule = runner.Rule(                                                                                                
+            rule_id="T-01",                                                                                                
+            dimension="Validity",                                                                                          
+            description="Probe rule matching no rows",                                                                     
+            sql="SELECT run_id FROM test_runs WHERE run_id = -1;",                                                         
+            expect=0,                                                                                                      
+        )                                                                                                                  
+        # Act                                                                                                              
+        rows = runner.run_rule(self.conn, rule)                                                                            
+        # Assert                                                                       
+        self.assertEqual(rows, [])                                                                                         
+                                                                                                                        
+    def test_run_rule_raises_validation_failed_error_with_the_evidence(self):                                              
+        # Arrange - Rule returning run 5003 with expect=0                                                                 
+        rule = runner.Rule(                                                                                                
+            rule_id="T-02",                                                                                                
+            dimension="Validity",                                                                                          
+            description="Probe rule catching run 5003",                                                                    
+            sql="SELECT run_id FROM test_runs WHERE run_id = 5003;",                                                       
+            expect=0,                                                                                                      
+        )                                                                                                                  
+        # Act & Assert                                                                                                     
+        with self.assertRaises(ValidationFailedError) as ctx:                                                              
+            runner.run_rule(self.conn, rule)                                                                               
+                                                                                                                            
+        self.assertEqual(ctx.exception.rule_id, "T-02")                                                                    
+        self.assertEqual(ctx.exception.rows, [(5003,)])                                                                    
+                                                                                                                               
+    def test_duration_rule_catches_the_known_bad_runs(self):                                                               
+        # Arrange (load rule R-04)                                                                                          
+        rules = {r.rule_id: r for r in runner.parse_rules()}                                                               
+        rule_r04 = rules["R-04"]                                                                                           
+        # Act (get rows returned by R-04)                                                                                 
+        _, rows = runner.fetch_rows(self.conn, rule_r04.sql)                                                               
+        returned_ids = {row[0] for row in rows}                                                                            
+        # Assert predicted bad runs (used 5009: -250ms, 5016: NULL) are caught                                     
+        self.assertEqual(returned_ids, {5009, 5016})                                                                       
+                                                                                                                               
+    def test_expectation_rule_fails_when_the_expected_row_is_missing(self):                                                
+        # Arrange an expectation rule with expect=1 whose SQL matches nothing                                             
+        rule = runner.Rule(                                                                                                
+            rule_id="E-99",                                                                                                
+            dimension="Expectation",                                                                                       
+            description="Expectation probe missing target row",                                                            
+            sql="SELECT run_id FROM test_runs WHERE run_id = -1;",                                                         
+            expect=1,                                                                                                      
+        )                                                                                                                  
+        # Act/Assert: missing row raises ValidationFailedError                                                       
+        with self.assertRaises(ValidationFailedError):                                                                     
+            runner.run_rule(self.conn, rule)                                                                               
+                                                                                                                               
+    def test_duration_rule_does_not_flag_legal_skipped_zero_ms_run(self):                                                  
+        # verify decoy run 5004 (SKIPPED with 0 ms) is NOT falsely flagged by R-04                                  
+        rules = {r.rule_id: r for r in runner.parse_rules()}                                                               
+        rule_r04 = rules["R-04"]                                                                                           
+        _, rows = runner.fetch_rows(self.conn, rule_r04.sql)                                                               
+        returned_ids = {row[0] for row in rows}                                                                            
+        self.assertNotIn(5004, returned_ids)  
 
 
 if __name__ == "__main__":

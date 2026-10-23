@@ -22,27 +22,26 @@ script counts the rows that are filled in; a 3-hour session has 5 driving blocks
 
 | | Name | Git user.name (as shown by `git log`) | Machine / repo owner |
 |---|---|---|---|
-| Partner A | | | |
-| Partner B | | | |
+| Partner A | Fahad | FahadH31 | Yes |
+| Partner B | Divyan | Divyan03 | |
 
-Branch: `feature/sql-validation-...`        Remote: ...
+Branch: `https://github.com/FahadH31/qe-foundations/tree/feature/sql-validation`        Remote: https://github.com/FahadH31/qe-foundations
 
 ## Swap log (one row per block)
 
 | Block | Clock time | Driver | Navigator | Goal of the block | Result (rules done, commit hash) | Predictions: right / wrong |
 |---|---|---|---|---|---|---|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
+| 1 | 1-1:30| Fahad | Divyan | Complete rules R-01 to R-04  | Done, c595e58 | Right |
+| 2 | 1:30-2:00 | Divyan | Fahad | Complete rules R-05 to R-08 | Done, ef36484 | Right |
+| 3 | 2:00-2:30 | Fahad | Divyan | Complete rules  R-09 to R-12 and E-01, E-02 | Done, 65c4212 | Right |
+| 4 | 2:30-3:00 | Divyan | Fahad | Complete block 4 - python runner | Done, 49c60c7 | N/A |
+| 5 | 3:00-3:30 | Fahad | Divyan | Complete tests, checklist, report | Done | N/A |
 
 ## Disagreements and how we settled them
-
 <!-- At least one honest example: what did you disagree about (query style, a rule's meaning, ...), and how did you decide? -->
-
+At some points we had different understandings/perspectives on query style or approach. While I cannot remember a specific example in detail, we would discuss why we thought our approach would work and the potential flaws in each other's approaches. This allowed us both to build better understandings and spot flaws in both our own and each other's logic. Running the actual queries helped determine the correctness as well.
 
 ## Hints we used
-
 <!-- Which hint levels, for which rules? (Using hints is fine -- hiding it is not.) -->
-
+We didn't need hints for the rules, though we did some googling and referencing of notes for certain keywords that we needed help/refreshing with. 
+We used the hints for the Python section that are listed there.  
