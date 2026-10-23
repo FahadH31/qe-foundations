@@ -1,4 +1,9 @@
 .venv/
 __pycache__/
 *.__pycache__
-.env
+.env# Append these lines to the .gitignore of your qe-foundations repo (do NOT replace the file)
+logs/
+*.db
+*.sqlite
+__pycache__/
+*.pyc
