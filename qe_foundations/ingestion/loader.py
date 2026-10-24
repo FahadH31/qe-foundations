@@ -12,6 +12,7 @@ and the READERS lookup table. You write the TODOs.
 """
 
 import csv
+import logging
 from pathlib import Path
 
 from .contexts import LoadSession
@@ -24,6 +25,8 @@ from .exceptions import (
 )
 from .readers import read_csv_records, read_json_records, read_xml_records
 from .validation import validate_record
+
+logger = logging.getLogger(__name__)
 
 # Which reader handles which file extension (always compare lower-case suffixes).
 READERS = {
@@ -114,6 +117,7 @@ def load_test_cases(path):
     * a repeated id -> DuplicateIdError for the LATER occurrence (the first one stays valid)
     * call report.check_invariants() before returning
     """
+    logger.info("Loading test cases from %s", path)
     with LoadSession(path):
         # Check if file extention is valid
         file_ext = Path(path).suffix.lower()
@@ -134,14 +138,16 @@ def load_test_cases(path):
                 clean_record = validate_record(i+1, raw_records[i])   # returns a clean dict from the raw record 
                 if clean_record["id"] in seen_ids:                    # handle duplicate IDs
                     report.rejected.append(DuplicateIdError(i+1, clean_record["id"]))     # if a failed row, append to the rejected list of this report 
+                    logger.warning("Row %d skipped: duplicate id '%s'", i+1, clean_record["id"])
                 else:
                     seen_ids.add(clean_record["id"])    # add to set to fill out list of IDs
                     report.valid.append(clean_record)   # if succeeded, add to the valid list of this report
             except RecordValidationError as error:
                 report.rejected.append(error)
+                logger.warning("Row %d skipped: %s", i+1, error)
         
         report.check_invariants()
-
+        logger.info("Loaded %s: %d valid, %d rejected", path, len(report.valid), len(report.rejected))
         return report
 
 def load_directory(folder):
@@ -165,6 +171,7 @@ def load_directory(folder):
             report = load_test_cases(file)      # returns an ingestionreport
             batch.reports.append(report)        # append that report to batch's list of reports
         except SourceError as error:            # if source error then append it to the batch's failed_sources list of reports
+            logger.error("Failed to load file %s: %s", file, error)
             batch.failed_sources.append(error)
     
     return batch
