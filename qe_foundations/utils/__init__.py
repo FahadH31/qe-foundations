@@ -13,6 +13,7 @@ from qe_foundations.utils.dates import timestamp_for_filename
 from qe_foundations.utils.dates import days_between
 
 from qe_foundations.utils.data_gen import make_users
+from qe_foundations.utils.logging_setup import setup_logging
 
 __all__ = ['normalize_whitespace', 'slugify', 'is_valid_email', 'is_positive_int', 'clamp', 'percent', 'add_days', 'is_weekend', 
-           'timestamp_for_filename', 'make_users', 'days_between', 'mask_email']
+           'timestamp_for_filename', 'make_users', 'days_between', 'mask_email', 'setup_logging']
